@@ -4,6 +4,8 @@ using SearchFight.Infraestructure;
 using Serilog;
 using System;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace SearchFight
 {
@@ -18,9 +20,11 @@ namespace SearchFight
             ConfigureServices(serviceCollection, configuration);
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
-
             string query = Console.ReadLine();
-            string[] queryArray = query.Split(' ');
+            string[] queryArray = Regex.Matches(query, @"[\""].+?[\""]|[^ ]+")
+                .Cast<Match>()
+                .Select(m => m.Value.Replace('\"', ' ').Trim())
+                .ToArray();
             try
             {
                 serviceProvider.GetService<SearchFight>().Run(queryArray);
